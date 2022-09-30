@@ -7,8 +7,8 @@
   "license": "MIT",
   "scripts": {
     "format": "prettier --write --ignore-unknown",
-    "test": "tsc && mocha **/*.test.js",
-    "type-check": "tsc --noEmit"
+    "test": "tsc && mocha **/*.test.js && tsc --build --clean",
+    "type-check": "tsc  --noEmit"
   },
   "devDependencies": {
     "@types/chai": "^4.3.3",
