@@ -17,7 +17,7 @@ export function statement(invoice: Invoice, plays: Record<string, Play>) {
 
 		switch (play.type) {
 			case 'tragedy':
-				thisAmount = 40000
+				thisAmount = 40_000
 
 				if (perf.audience > 30) {
 					thisAmount += 1000 * (perf.audience - 30)
@@ -25,10 +25,10 @@ export function statement(invoice: Invoice, plays: Record<string, Play>) {
 
 				break
 			case 'comedy':
-				thisAmount = 3000
+				thisAmount = 30_000
 
 				if (perf.audience > 20) {
-					thisAmount += 1000 + 500 + (perf.audience - 20)
+					thisAmount += 10_000 + 500 * (perf.audience - 20)
 				}
 
 				thisAmount += 300 * perf.audience
@@ -46,13 +46,11 @@ export function statement(invoice: Invoice, plays: Record<string, Play>) {
 			volumeCredits += Math.floor(perf.audience / 5)
 
 		// Вывод строки счета
-		result += `   ${play.name}: ${format(thisAmount / 1000)}`
-		result += `   (${perf.audience} seats)\n`
+		result += ` ${play.name}: ${format(thisAmount / 1000)}`
+		result += ` (${perf.audience} seats)\n`
 		totalAmount += thisAmount
-		result += `Amount owed is ${format(totalAmount / 100)}\n`
-		result += `You earned ${volumeCredits} credits\n`
-		return result
 	}
-
-	return true
+	result += `Amount owed is ${format(totalAmount / 100)}\n`
+	result += `You earned ${volumeCredits} credits\n`
+	return result
 }
