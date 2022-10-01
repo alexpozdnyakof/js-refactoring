@@ -1,7 +1,7 @@
 import { Invoice, Play, Performance } from './domain-types'
 
 
-type PerformanceWithPlay = Performance & { play: Play }
+type EnrichedPerformance = Performance & { play: Play } & { amount: number }
 
 export function statement(invoice: Invoice, plays: Record<string, Play>) {
 	const statementData = {
@@ -12,42 +12,20 @@ export function statement(invoice: Invoice, plays: Record<string, Play>) {
 
 	function enrichPerformance<T extends Performance>(
 		aPerformance: T
-	): T & { play: Play } {
-		return Object.assign({ play: playFor(aPerformance) }, aPerformance)
+	): EnrichedPerformance {
+		const withPlay = Object.assign(
+			{ play: playFor(aPerformance) },
+			aPerformance
+		)
+		return {
+			...withPlay,
+			amount: amountFor(withPlay),
+		}
 	}
 	function playFor(aPerformance: Performance) {
 		return plays[aPerformance.playID]
 	}
-}
-
-function renderPlainText(
-	data: {
-		customer: string
-		performances: Array<PerformanceWithPlay>
-	},
-	plays: Record<string, Play>
-): string {
-	let result = `Statement for ${data.customer}\n`
-	for (let perf of data.performances) {
-		// Вывод строки счета
-		result += ` ${perf.play.name}: ${usd(amountFor(perf) / 100)}`
-		result += ` (${perf.audience} seats)\n`
-	}
-	result += `Amount owed is ${usd(totalAmount())}\n`
-	result += `You earned ${totalVolumeCredits()} credits\n`
-	return result
-
-	function volumeCreditsFor(aPerformance: PerformanceWithPlay): number {
-		let result = 0
-		result += Math.max(aPerformance.audience - 30, 0)
-
-		if (aPerformance.play.type == 'comedy')
-			result += Math.floor(aPerformance.audience / 5)
-
-		return result
-	}
-
-	function amountFor(aPerformance: PerformanceWithPlay): number {
+	function amountFor(aPerformance: Performance & { play: Play }): number {
 		let result = 0
 
 		switch (aPerformance.play.type) {
@@ -74,11 +52,41 @@ function renderPlainText(
 		}
 		return result
 	}
+}
+
+function renderPlainText(
+	data: {
+		customer: string
+		performances: Array<EnrichedPerformance>
+	},
+	plays: Record<string, Play>
+): string {
+	let result = `Statement for ${data.customer}\n`
+
+	for (let perf of data.performances) {
+		result += ` ${perf.play.name}: ${usd(perf.amount)} (${
+			perf.audience
+		} seats)\n`
+	}
+
+	result += `Amount owed is ${usd(totalAmount())}\n`
+	result += `You earned ${totalVolumeCredits()} credits\n`
+	return result
+
+	function volumeCreditsFor(aPerformance: EnrichedPerformance): number {
+		let result = 0
+		result += Math.max(aPerformance.audience - 30, 0)
+
+		if (aPerformance.play.type == 'comedy')
+			result += Math.floor(aPerformance.audience / 5)
+
+		return result
+	}
 
 	function totalAmount() {
 		let result = 0
 		for (let perf of data.performances) {
-			result += amountFor(perf)
+			result += perf.amount
 		}
 		return result
 	}
