@@ -1,7 +1,9 @@
 import { Invoice, Play, Performance } from './domain-types'
 
-
-type EnrichedPerformance = Performance & { play: Play } & { amount: number }
+type PerformanceWithPlay = Performance & { play: Play }
+type EnrichedPerformance = PerformanceWithPlay & { amount: number } & {
+	volumeCredits: number
+}
 
 export function statement(invoice: Invoice, plays: Record<string, Play>) {
 	const statementData = {
@@ -20,12 +22,13 @@ export function statement(invoice: Invoice, plays: Record<string, Play>) {
 		return {
 			...withPlay,
 			amount: amountFor(withPlay),
+			volumeCredits: volumeCreditsFor(withPlay),
 		}
 	}
 	function playFor(aPerformance: Performance) {
 		return plays[aPerformance.playID]
 	}
-	function amountFor(aPerformance: Performance & { play: Play }): number {
+	function amountFor(aPerformance: PerformanceWithPlay): number {
 		let result = 0
 
 		switch (aPerformance.play.type) {
@@ -52,6 +55,16 @@ export function statement(invoice: Invoice, plays: Record<string, Play>) {
 		}
 		return result
 	}
+
+	function volumeCreditsFor(aPerformance: PerformanceWithPlay): number {
+		let result = 0
+		result += Math.max(aPerformance.audience - 30, 0)
+
+		if (aPerformance.play.type == 'comedy')
+			result += Math.floor(aPerformance.audience / 5)
+
+		return result
+	}
 }
 
 function renderPlainText(
@@ -73,16 +86,6 @@ function renderPlainText(
 	result += `You earned ${totalVolumeCredits()} credits\n`
 	return result
 
-	function volumeCreditsFor(aPerformance: EnrichedPerformance): number {
-		let result = 0
-		result += Math.max(aPerformance.audience - 30, 0)
-
-		if (aPerformance.play.type == 'comedy')
-			result += Math.floor(aPerformance.audience / 5)
-
-		return result
-	}
-
 	function totalAmount() {
 		let result = 0
 		for (let perf of data.performances) {
@@ -94,7 +97,7 @@ function renderPlainText(
 	function totalVolumeCredits() {
 		let result = 0
 		for (let perf of data.performances) {
-			result += volumeCreditsFor(perf)
+			result += perf.volumeCredits
 		}
 		return result
 	}
