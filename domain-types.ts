@@ -3,10 +3,13 @@ export type Play = {
   type: 'tragedy' | 'comedy'
 }
 
-export type Invoice = {
-  customer: string;
-  performances: Array<{
-    playID: string;
-    audience: number;
-  }>
+export type Performance = {
+	playID: string
+	audience: number
 }
+
+export type Invoice = {
+	customer: string
+	performances: Array<Performance>
+}
+
