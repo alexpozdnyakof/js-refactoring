@@ -1,9 +1,21 @@
 import { Invoice, Play, Performance } from './domain-types'
 
 export function statement(invoice: Invoice, plays: Record<string, Play>) {
-	const playFor = (aPerformance: Performance) => plays[aPerformance.playID]
+	let result = `Statement for ${invoice.customer}\n`
+	for (let perf of invoice.performances) {
+		// Вывод строки счета
+		result += ` ${playFor(perf).name}: ${usd(amountFor(perf) / 100)}`
+		result += ` (${perf.audience} seats)\n`
+	}
+	result += `Amount owed is ${usd(totalAmount())}\n`
+	result += `You earned ${totalVolumeCredits()} credits\n`
+	return result
 
-	const volumeCreditsFor = (aPerformance: Performance): number => {
+	function playFor(aPerformance: Performance) {
+		return plays[aPerformance.playID]
+	}
+
+	function volumeCreditsFor(aPerformance: Performance): number {
 		let result = 0
 		result += Math.max(aPerformance.audience - 30, 0)
 
@@ -41,8 +53,6 @@ export function statement(invoice: Invoice, plays: Record<string, Play>) {
 		return result
 	}
 
-	let result = `Statement for ${invoice.customer}\n`
-
 	function totalAmount() {
 		let result = 0
 		for (let perf of invoice.performances) {
@@ -59,15 +69,6 @@ export function statement(invoice: Invoice, plays: Record<string, Play>) {
 		return result
 	}
 
-  for (let perf of invoice.performances) {
-		// Вывод строки счета
-		result += ` ${playFor(perf).name}: ${usd(amountFor(perf) / 100)}`
-		result += ` (${perf.audience} seats)\n`
-  }
-
-  result += `Amount owed is ${usd(totalAmount())}\n`
-  result += `You earned ${totalVolumeCredits()} credits\n`
-	return result
 }
 
 function usd(aNumber: number): string {
