@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.statement = void 0;
 function statement(invoice, plays) {
     let totalAmount = 0;
-    let volumeCredits = 0;
     const playFor = (aPerformance) => plays[aPerformance.playID];
     const volumeCreditsFor = (aPerformance) => {
         let result = 0;
@@ -35,13 +34,14 @@ function statement(invoice, plays) {
     }
     let result = `Statement for ${invoice.customer}\n`;
     for (let perf of invoice.performances) {
-        volumeCredits += volumeCreditsFor(perf);
-        if ('comedy' == playFor(perf).type)
-            volumeCredits += Math.floor(perf.audience / 5);
         // Вывод строки счета
         result += ` ${playFor(perf).name}: ${usd(amountFor(perf) / 100)}`;
         result += ` (${perf.audience} seats)\n`;
         totalAmount += amountFor(perf);
+    }
+    let volumeCredits = 0;
+    for (let perf of invoice.performances) {
+        volumeCredits += volumeCreditsFor(perf);
     }
     result += `Amount owed is ${usd(totalAmount)}\n`;
     result += `You earned ${volumeCredits} credits\n`;
