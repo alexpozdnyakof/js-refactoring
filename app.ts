@@ -1,6 +1,15 @@
 import { Invoice, Play, Performance } from './domain-types'
 
 export function statement(invoice: Invoice, plays: Record<string, Play>) {
+	const statementData = {}
+	return renderPlainText(statementData, invoice, plays)
+}
+
+function renderPlainText(
+	data: Record<string, any>,
+	invoice: Invoice,
+	plays: Record<string, Play>
+): string {
 	let result = `Statement for ${invoice.customer}\n`
 	for (let perf of invoice.performances) {
 		// Вывод строки счета
@@ -69,14 +78,11 @@ export function statement(invoice: Invoice, plays: Record<string, Play>) {
 		return result
 	}
 
+	function usd(aNumber: number): string {
+		return new Intl.NumberFormat('en-US', {
+			style: 'currency',
+			currency: 'USD',
+			minimumFractionDigits: 2,
+		}).format(aNumber / 100)
+	}
 }
-
-function usd(aNumber: number): string {
-	return new Intl.NumberFormat('en-US', {
-		style: 'currency',
-		currency: 'USD',
-		minimumFractionDigits: 2,
-	}).format(aNumber / 100)
-}
-
-
