@@ -1,17 +1,15 @@
 import { Invoice, Play, Performance } from './domain-types'
 
 export function statement(invoice: Invoice, plays: Record<string, Play>) {
-	const statementData = {}
-	return renderPlainText(statementData, invoice, plays)
+	const statementData = {
+		...invoice,
+	}
+	return renderPlainText(statementData, plays)
 }
 
-function renderPlainText(
-	data: Record<string, any>,
-	invoice: Invoice,
-	plays: Record<string, Play>
-): string {
-	let result = `Statement for ${invoice.customer}\n`
-	for (let perf of invoice.performances) {
+function renderPlainText(data: Invoice, plays: Record<string, Play>): string {
+	let result = `Statement for ${data.customer}\n`
+	for (let perf of data.performances) {
 		// Вывод строки счета
 		result += ` ${playFor(perf).name}: ${usd(amountFor(perf) / 100)}`
 		result += ` (${perf.audience} seats)\n`
@@ -64,7 +62,7 @@ function renderPlainText(
 
 	function totalAmount() {
 		let result = 0
-		for (let perf of invoice.performances) {
+		for (let perf of data.performances) {
 			result += amountFor(perf)
 		}
 		return result
@@ -72,7 +70,7 @@ function renderPlainText(
 
 	function totalVolumeCredits() {
 		let result = 0
-		for (let perf of invoice.performances) {
+		for (let perf of data.performances) {
 			result += volumeCreditsFor(perf)
 		}
 		return result
