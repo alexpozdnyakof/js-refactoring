@@ -81,21 +81,19 @@ export function statement(invoice: Invoice, plays: Record<string, Play>) {
 		return result
 	}
 
-	function totalAmount(data: { performances: Array<EnrichedPerformance> }) {
-		let result = 0
-		for (let perf of data.performances) {
-			result += perf.amount
-		}
-		return result
-	}
-	function totalVolumeCredits(data: {
+	function totalAmount({
+		performances,
+	}: {
 		performances: Array<EnrichedPerformance>
 	}) {
-		let result = 0
-		for (let perf of data.performances) {
-			result += perf.volumeCredits
-		}
-		return result
+		return performances.reduce((total, p) => total + p.amount, 0)
+	}
+	function totalVolumeCredits({
+		performances,
+	}: {
+		performances: Array<EnrichedPerformance>
+	}) {
+		return performances.reduce((total, p) => total + p.volumeCredits, 0)
 	}
 }
 
