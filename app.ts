@@ -3,18 +3,27 @@ import { Invoice, Play, Performance } from './domain-types'
 export function statement(invoice: Invoice, plays: Record<string, Play>) {
 	let totalAmount = 0
 	let volumeCredits = 0
-  const playFor = (aPerformance: Performance) => plays[aPerformance.playID]
+	const playFor = (aPerformance: Performance) => plays[aPerformance.playID]
 
-  let result = `Statement for ${invoice.customer}\n`
-  const format = new Intl.NumberFormat('en-US', {
+	const volumeCreditsFor = (aPerformance: Performance): number => {
+		let result = 0
+		result += Math.max(aPerformance.audience - 30, 0)
+
+		if (playFor(aPerformance).type == 'comedy')
+			result += Math.floor(aPerformance.audience / 5)
+
+		return result
+  }
+
+	let result = `Statement for ${invoice.customer}\n`
+	const format = new Intl.NumberFormat('en-US', {
 		style: 'currency',
 		currency: 'USD',
 		minimumFractionDigits: 2,
-  }).format
+	}).format
 
-  for (let perf of invoice.performances) {
-		// Добавление бонусов
-		volumeCredits += Math.max(perf.audience - 30, 0)
+	for (let perf of invoice.performances) {
+		volumeCredits += volumeCreditsFor(perf)
 
 		// Дополнительный бонус за каждые 10 комедий
 		if ('comedy' == playFor(perf).type)
@@ -26,11 +35,12 @@ export function statement(invoice: Invoice, plays: Record<string, Play>) {
 		)}`
 		result += ` (${perf.audience} seats)\n`
 		totalAmount += amountFor(perf, playFor(perf))
-  }
+	}
 	result += `Amount owed is ${format(totalAmount / 100)}\n`
 	result += `You earned ${volumeCredits} credits\n`
 	return result
 }
+
 
 function amountFor(aPerformance: Performance, play: Play): number {
 	let result = 0
