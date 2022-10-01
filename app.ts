@@ -5,12 +5,27 @@ type EnrichedPerformance = PerformanceWithPlay & { amount: number } & {
 	volumeCredits: number
 }
 
+type StatementData = {
+	customer: string
+	performances: Array<EnrichedPerformance>
+	totalAmount: number
+	totalVolumeCredits: number
+}
+
 export function statement(invoice: Invoice, plays: Record<string, Play>) {
-	const statementData = {
+	const withEnrichedPerformances = {
 		customer: invoice.customer,
 		performances: invoice.performances.map(enrichPerformance),
 	}
-	return renderPlainText(statementData, plays)
+	const statementData = {
+		...withEnrichedPerformances,
+		totalAmount: totalAmount(withEnrichedPerformances),
+		totalVolumeCredits: totalVolumeCredits(withEnrichedPerformances),
+	}
+	return renderPlainText(
+		{ ...statementData, totalAmount: totalAmount(statementData) },
+		plays
+	)
 
 	function enrichPerformance<T extends Performance>(
 		aPerformance: T
@@ -65,13 +80,27 @@ export function statement(invoice: Invoice, plays: Record<string, Play>) {
 
 		return result
 	}
+
+	function totalAmount(data: { performances: Array<EnrichedPerformance> }) {
+		let result = 0
+		for (let perf of data.performances) {
+			result += perf.amount
+		}
+		return result
+	}
+	function totalVolumeCredits(data: {
+		performances: Array<EnrichedPerformance>
+	}) {
+		let result = 0
+		for (let perf of data.performances) {
+			result += perf.volumeCredits
+		}
+		return result
+	}
 }
 
 function renderPlainText(
-	data: {
-		customer: string
-		performances: Array<EnrichedPerformance>
-	},
+	data: StatementData,
 	plays: Record<string, Play>
 ): string {
 	let result = `Statement for ${data.customer}\n`
@@ -82,25 +111,9 @@ function renderPlainText(
 		} seats)\n`
 	}
 
-	result += `Amount owed is ${usd(totalAmount())}\n`
-	result += `You earned ${totalVolumeCredits()} credits\n`
+	result += `Amount owed is ${usd(data.totalAmount)}\n`
+	result += `You earned ${data.totalVolumeCredits} credits\n`
 	return result
-
-	function totalAmount() {
-		let result = 0
-		for (let perf of data.performances) {
-			result += perf.amount
-		}
-		return result
-	}
-
-	function totalVolumeCredits() {
-		let result = 0
-		for (let perf of data.performances) {
-			result += perf.volumeCredits
-		}
-		return result
-	}
 
 	function usd(aNumber: number): string {
 		return new Intl.NumberFormat('en-US', {
