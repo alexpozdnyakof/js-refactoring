@@ -13,20 +13,19 @@ export function statement(invoice: Invoice, plays: Record<string, Play>) {
   }).format
 
   for (let perf of invoice.performances) {
-		const play = playFor(perf)
-		let thisAmount = amountFor(perf, play)
-
 		// Добавление бонусов
 		volumeCredits += Math.max(perf.audience - 30, 0)
 
 		// Дополнительный бонус за каждые 10 комедий
-		if ('comedy' == play.type)
+		if ('comedy' == playFor(perf).type)
 			volumeCredits += Math.floor(perf.audience / 5)
 
 		// Вывод строки счета
-		result += ` ${play.name}: ${format(thisAmount / 1000)}`
+		result += ` ${playFor(perf).name}: ${format(
+			amountFor(perf, playFor(perf)) / 1000
+		)}`
 		result += ` (${perf.audience} seats)\n`
-		totalAmount += thisAmount
+		totalAmount += amountFor(perf, playFor(perf))
   }
 	result += `Amount owed is ${format(totalAmount / 100)}\n`
 	result += `You earned ${volumeCredits} credits\n`
