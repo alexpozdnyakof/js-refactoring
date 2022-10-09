@@ -53,21 +53,22 @@ export default function createStatementData(
 
 		return result
 	}
+}
 
-	function totalAmount({
-		performances,
-	}: {
-		performances: Array<EnrichedPerformance>
-	}) {
-		return performances.reduce((total, p) => total + p.amount, 0)
-	}
-	function totalVolumeCredits({
-		performances,
-	}: {
-		performances: Array<EnrichedPerformance>
-	}) {
-		return performances.reduce((total, p) => total + p.volumeCredits, 0)
-	}
+function totalAmount({
+	performances,
+}: {
+	performances: Array<EnrichedPerformance>
+}) {
+	return performances.reduce((total, p) => total + p.amount, 0)
+}
+
+function totalVolumeCredits({
+	performances,
+}: {
+	performances: Array<EnrichedPerformance>
+}) {
+	return performances.reduce((total, p) => total + p.volumeCredits, 0)
 }
 
 function amountFor(aPerformance: PerformanceWithPlay): number {
