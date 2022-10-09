@@ -40,19 +40,20 @@ export default function createStatementData(
 			volumeCredits: volumeCreditsFor(withPlay),
 		}
 	}
+
 	function playFor(aPerformance: Performance) {
 		return plays[aPerformance.playID]
 	}
+}
 
-	function volumeCreditsFor(aPerformance: PerformanceWithPlay): number {
-		let result = 0
-		result += Math.max(aPerformance.audience - 30, 0)
+function volumeCreditsFor(aPerformance: PerformanceWithPlay): number {
+	let result = 0
+	result += Math.max(aPerformance.audience - 30, 0)
 
-		if (aPerformance.play.type == 'comedy')
-			result += Math.floor(aPerformance.audience / 5)
+	if (aPerformance.play.type == 'comedy')
+		result += Math.floor(aPerformance.audience / 5)
 
-		return result
-	}
+	return result
 }
 
 function totalAmount({
