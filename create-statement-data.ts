@@ -43,33 +43,6 @@ export default function createStatementData(
 	function playFor(aPerformance: Performance) {
 		return plays[aPerformance.playID]
 	}
-	function amountFor(aPerformance: PerformanceWithPlay): number {
-		let result = 0
-
-		switch (aPerformance.play.type) {
-			case 'tragedy':
-				result = 40_000
-
-				if (aPerformance.audience > 30) {
-					result += 1000 * (aPerformance.audience - 30)
-				}
-
-				break
-			case 'comedy':
-				result = 30_000
-
-				if (aPerformance.audience > 20) {
-					result += 10_000 + 500 * (aPerformance.audience - 20)
-				}
-
-				result += 300 * aPerformance.audience
-				break
-
-			default:
-				throw new Error(`unknown type: ${aPerformance.play.type}`)
-		}
-		return result
-	}
 
 	function volumeCreditsFor(aPerformance: PerformanceWithPlay): number {
 		let result = 0
@@ -95,4 +68,32 @@ export default function createStatementData(
 	}) {
 		return performances.reduce((total, p) => total + p.volumeCredits, 0)
 	}
+}
+
+function amountFor(aPerformance: PerformanceWithPlay): number {
+	let result = 0
+
+	switch (aPerformance.play.type) {
+		case 'tragedy':
+			result = 40_000
+
+			if (aPerformance.audience > 30) {
+				result += 1000 * (aPerformance.audience - 30)
+			}
+
+			break
+		case 'comedy':
+			result = 30_000
+
+			if (aPerformance.audience > 20) {
+				result += 10_000 + 500 * (aPerformance.audience - 20)
+			}
+
+			result += 300 * aPerformance.audience
+			break
+
+		default:
+			throw new Error(`unknown type: ${aPerformance.play.type}`)
+	}
+	return result
 }
